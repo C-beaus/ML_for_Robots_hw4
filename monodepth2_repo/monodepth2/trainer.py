@@ -163,6 +163,10 @@ class Trainer:
         # reduce num_workers to 6 to try and avoid broken pipe issue due to running out of virtual memory (paging file)
         self.opt.num_workers = 6
 
+        # Increase debugger timeout to allow the debugger to process long tasks, such as iter(self.val_loader)
+        os.environ["PYDEVD_WARN_EVALUATION_TIMEOUT"] = "120"
+        os.environ["PYDEVD_THREAD_DUMP_ON_WARN_EVALUATION_TIMEOUT"] = "true"
+
         train_dataset = self.dataset(
             self.opt.data_path, train_filenames, self.opt.height, self.opt.width,
             self.opt.frame_ids, 4, is_train=True, img_ext=img_ext) #InterpolationMode.LANCZOS # 4 # InterpolationMode.LANCZOS.value
@@ -240,6 +244,7 @@ class Trainer:
         self.start_time = time.time()
         for self.epoch in range(self.opt.num_epochs):
             self.run_epoch()
+            print(f"Epoch = {self.epoch}")
             if (self.epoch + 1) % self.opt.save_frequency == 0:
                 self.save_model()
 
