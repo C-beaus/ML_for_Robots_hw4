@@ -28,6 +28,8 @@ from IPython import embed
 import torchvision
 from torchvision.transforms import InterpolationMode
 
+import torch.multiprocessing as mp
+
 # import datasets.syndrone_dataset
 
 
@@ -120,6 +122,10 @@ class Trainer:
         # train_dataset = torchvision.datasets.ImageFolder(
         #     root = 
         # )
+        
+        # Code to set multiprocessing method to spawn instead of fork, hopefully fixing broken pipe error caused by paging file being too small
+        mp.set_start_method('spawn', force=True)
+
 
         datasets_dict = {"kitti": datasets.KITTIRAWDataset,
                          "kitti_odom": datasets.KITTIOdomDataset,
@@ -128,18 +134,38 @@ class Trainer:
         
         self.dataset = datasets_dict[self.opt.dataset]
 
-        fpath = os.path.join(os.path.dirname(__file__), "splits", self.opt.split, "{}_files.txt")
+        if self.opt.dataset == 'syndrone':
+            # NOTE: The syndrone data must be donwloaded into a folder called syndrone_data and placed within the monodepth2 folder
+            self.opt.data_path = 'C:\\Users\\chase\\OneDrive\\Documents\\Grad\\ML_for_Robots\\hw_4\\ML_for_Robots_hw4\\monodetph2_repo\\monodepth2\\syndrone_data'
+            rgb_folder = os.path.join(os.path.dirname(__file__), "syndrone_data", "Town01_Opt_120_color", "Town01_Opt_120", "ClearNoon", "height20m", "rgb")
+            image_names = self.get_image_names(rgb_folder)
 
-        train_filenames = readlines(fpath.format("train"))
-        val_filenames = readlines(fpath.format("val"))
+            train_filenames = image_names[0:int(len(image_names)*0.8)] # Take the first 80% of images as training data
+            val_filenames = image_names[int(len(image_names)*0.8):] # The rest of the images are validation data
+
+            # Combine both height20m and height80m into train and validation set
+            rgb_folder_80m = os.path.join(os.path.dirname(__file__), "syndrone_data", "Town01_Opt_120_color", "Town01_Opt_120", "ClearNoon", "height80m", "rgb")
+            image_names_80m = self.get_image_names(rgb_folder_80m)
+
+            train_filenames = train_filenames + (image_names_80m[0:int(len(image_names_80m)*0.8)]) # Take the first 80% of images as training data
+            val_filenames = val_filenames + (image_names_80m[int(len(image_names_80m)*0.8):]) # The rest of the images are validation data
+
+        else:
+            fpath = os.path.join(os.path.dirname(__file__), "splits", self.opt.split, "{}_files.txt")
+            train_filenames = readlines(fpath.format("train"))
+            val_filenames = readlines(fpath.format("val"))
+
         img_ext = '.png' if self.opt.png else '.jpg'
 
         num_train_samples = len(train_filenames)
         self.num_total_steps = num_train_samples // self.opt.batch_size * self.opt.num_epochs
 
+        # reduce num_workers to 6 to try and avoid broken pipe issue due to running out of virtual memory (paging file)
+        self.opt.num_workers = 6
+
         train_dataset = self.dataset(
             self.opt.data_path, train_filenames, self.opt.height, self.opt.width,
-            self.opt.frame_ids, 4, is_train=True, img_ext=img_ext) #InterpolationMode.LANCZOS
+            self.opt.frame_ids, 4, is_train=True, img_ext=img_ext) #InterpolationMode.LANCZOS # 4 # InterpolationMode.LANCZOS.value
         self.train_loader = DataLoader(
             train_dataset, self.opt.batch_size, True,
             num_workers=self.opt.num_workers, pin_memory=True, drop_last=True)
@@ -150,6 +176,8 @@ class Trainer:
             val_dataset, self.opt.batch_size, True,
             num_workers=self.opt.num_workers, pin_memory=True, drop_last=True)
         self.val_iter = iter(self.val_loader) #Comment this out and try again to see what is in train()
+
+        print("FINISHED ITERATING OVER SELF.VAL_LOADER")
 
         self.writers = {}
         for mode in ["train", "val"]:
@@ -179,6 +207,18 @@ class Trainer:
             len(train_dataset), len(val_dataset)))
 
         self.save_opts()
+
+    def get_image_names(self, folder_path):
+        image_extensions = ['jpg']
+        image_names = []
+
+        for filename in os.listdir(folder_path):
+            if os.path.isfile(os.path.join(folder_path, filename)) and \
+            any (filename.endswith(ext) for ext in image_extensions):
+                filename_without_extension = os.path.splitext(filename)[0]
+                image_names.append(folder_path + " " + filename_without_extension + " l")  ################# SHOULD THIS HAVE L AT THE END OF IT
+
+        return image_names
 
     def set_train(self):
         """Convert all models to training mode

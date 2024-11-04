@@ -17,5 +17,9 @@ if __name__ == "__main__":
     # opts = [
     #     '--model_name', 'mono_model'
     # ]
+
+    # Choose the dataset you want to train and test on, default is kitti
+    opts.dataset = "syndrone"
+
     trainer = Trainer(opts)
     trainer.train()

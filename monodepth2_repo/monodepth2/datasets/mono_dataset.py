@@ -54,6 +54,8 @@ class MonoDataset(data.Dataset):
         self.height = height
         self.width = width
         self.num_scales = num_scales
+        # if num_scales == 'lanczos':
+        #     self.num_scales = 4
         self.interp = Image.ANTIALIAS
 
         self.frame_idxs = frame_idxs
