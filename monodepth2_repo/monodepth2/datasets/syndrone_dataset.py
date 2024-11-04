@@ -70,7 +70,7 @@ class SyndroneRAWDataset(SyndroneDataset):
 
     def get_image_path(self, folder, frame_index, side):
         # f_str = "{:010d}{}".format(frame_index, self.img_ext)
-        print("printing in get_image_path")
+        # print("printing in get_image_path")
         # print(f_str)
         # print(folder)
         # print(self.side_map[side])

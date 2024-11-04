@@ -105,6 +105,9 @@ class MonoDataset(data.Dataset):
 
         for k in list(inputs):
             f = inputs[k]
+            print("inputs type: " + str(type(inputs)))
+            print("color_aug type: " + str(type(color_aug)))
+            print("color_aug(f) type: " + str(type(color_aug(f))))
             if "color" in k:
                 n, im, i = k
                 inputs[(n, im, i)] = self.to_tensor(f)
