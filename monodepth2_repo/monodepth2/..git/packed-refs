@@ -1,0 +1,6 @@
+# pack-refs with: peeled fully-peeled sorted 
+ea8feecafaf7d2cbd2dfa3e2d0a6e7ce27f18ab8 refs/remotes/origin/documentation
+b676244e5a1ca55564eb5d16ab521a48f823af31 refs/remotes/origin/master
+75dbcd592568bb6d336fb10ea345561aebc42ed6 refs/remotes/origin/mfirman/pose_eval
+8ee44b711ce4736ad792bd07548fc4add9158b9e refs/remotes/origin/pil_image_saving
+bbe6a8ebe9dd6eed84de045a7311f3fd845a7e4d refs/remotes/origin/training_profiling
