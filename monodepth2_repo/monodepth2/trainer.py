@@ -161,7 +161,7 @@ class Trainer:
         self.num_total_steps = num_train_samples // self.opt.batch_size * self.opt.num_epochs
 
         # reduce num_workers to 6 to try and avoid broken pipe issue due to running out of virtual memory (paging file)
-        self.opt.num_workers = 6
+        self.opt.num_workers = 0
 
         # Increase debugger timeout to allow the debugger to process long tasks, such as iter(self.val_loader)
         os.environ["PYDEVD_WARN_EVALUATION_TIMEOUT"] = "120"

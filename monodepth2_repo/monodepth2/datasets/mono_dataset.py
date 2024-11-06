@@ -105,13 +105,25 @@ class MonoDataset(data.Dataset):
 
         for k in list(inputs):
             f = inputs[k]
-            print("inputs type: " + str(type(inputs)))
-            print("color_aug type: " + str(type(color_aug)))
-            print("color_aug(f) type: " + str(type(color_aug(f))))
+            # print("inputs type: " + str(type(inputs)))
+            # print("color_aug type: " + str(type(color_aug)))
+            # print("color_aug(f) type: " + str(type(color_aug(f))))
             if "color" in k:
                 n, im, i = k
                 inputs[(n, im, i)] = self.to_tensor(f)
-                inputs[(n + "_aug", im, i)] = self.to_tensor(color_aug(f))
+                if isinstance(color_aug, bool):
+                    order, brightness, contrast, saturation, hue = transforms.ColorJitter.get_params(
+                        self.brightness, self.contrast, self.saturation, self.hue)
+                    transform_functions = {
+                        0: (transforms.functional.adjust_brightness, brightness),
+                        1: (transforms.functional.adjust_contrast, contrast),
+                        2: (transforms.functional.adjust_saturation, saturation),
+                        3: (transforms.functional.adjust_hue, hue)
+                        }
+                    augmented_image = self.apply_ordered_color_jitter(f, order, transform_functions)
+                    inputs[(n + "_aug", im, i)] = self.to_tensor(augmented_image)
+                else:
+                    inputs[(n + "_aug", im, i)] = self.to_tensor(color_aug(f))
 
     def __len__(self):
         return len(self.filenames)
@@ -178,8 +190,11 @@ class MonoDataset(data.Dataset):
             inputs[("inv_K", scale)] = torch.from_numpy(inv_K)
 
         if do_color_aug:
-            color_aug = transforms.ColorJitter.get_params(
-                self.brightness, self.contrast, self.saturation, self.hue)
+            # color_aug = transforms.ColorJitter.get_params(
+            #     self.brightness, self.contrast, self.saturation, self.hue)
+
+            color_aug = True
+            
         else:
             color_aug = (lambda x: x)
 
@@ -203,6 +218,13 @@ class MonoDataset(data.Dataset):
             inputs["stereo_T"] = torch.from_numpy(stereo_T)
 
         return inputs
+    
+    def apply_ordered_color_jitter(self, image, order, transform_functions):
+        # Apply the transformations in the specified order
+        for index in order:
+            func, param = transform_functions[index.item()]
+            image = func(image, param)
+        return image
 
     def get_color(self, folder, frame_index, side, do_flip):
         raise NotImplementedError
