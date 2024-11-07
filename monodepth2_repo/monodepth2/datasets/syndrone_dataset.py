@@ -69,27 +69,6 @@ class SyndroneRAWDataset(SyndroneDataset):
         super(SyndroneRAWDataset, self).__init__(*args, **kwargs)
 
     def get_image_path(self, folder, frame_index, side):
-        # f_str = "{:010d}{}".format(frame_index, self.img_ext)
-        # print("printing in get_image_path")
-        # print(f_str)
-        # print(folder)
-        # print(self.side_map[side])
-        # image_path = os.path.join(
-        #     self.data_path, folder, "image_0{}/data".format(self.side_map[side]), f_str)
-
-        # print("type 1: " + type(self.side_map[side]))
-        # print("type 2: " + type(f"{self.side_map[side]}"))
-        # print(self.side_map[side])
-        # print("type 1: " + f"{self.side_map[side]}")
-        # print(frame_index)
-        # print("f_string type: " + str(type(f_str)))
-        # print("self.data_path type: " + str(type(self.data_path)))
-        # print("folder type: " + str(type(folder)))
-        # print("frame_index type: " + str(type(frame_index)))
-
-        # print(self.side_map) # 2
-        # print(side) # l
-
         f_str = "{:05d}{}".format(frame_index, self.img_ext)
         # print(f_str)
         image_path = os.path.join(
@@ -140,16 +119,24 @@ class SyndroneDepthDataset(SyndroneDataset):
         super(SyndroneDepthDataset, self).__init__(*args, **kwargs)
 
     def get_image_path(self, folder, frame_index, side):
-        f_str = "{:010d}{}".format(frame_index, self.img_ext)
+        # f_str = "{:010d}{}".format(frame_index, self.img_ext)
+        # image_path = os.path.join(
+        #     self.data_path,
+        #     folder,
+        #     "image_0{}/data".format(self.side_map[side]),
+        #     f_str)
+        
+        f_str = "{:05d}{}".format(frame_index, self.img_ext)
+        # print(f_str)
         image_path = os.path.join(
-            self.data_path,
-            folder,
-            "image_0{}/data".format(self.side_map[side]),
-            f_str)
+            self.data_path, folder, f_str #f"{self.side_map[side]}"
+        )
         return image_path
+    
+
 
     def get_depth(self, folder, frame_index, side, do_flip):
-        f_str = "{:010d}.png".format(frame_index)
+        f_str = "{:05d}.png".format(frame_index)
         depth_path = os.path.join(
             self.data_path,
             folder,

@@ -19,7 +19,7 @@ if __name__ == "__main__":
     # ]
 
     # Choose the dataset you want to train and test on, default is kitti
-    opts.dataset = "syndrone"
+    opts.dataset = "syndrone_depth"
 
     trainer = Trainer(opts)
     trainer.train()

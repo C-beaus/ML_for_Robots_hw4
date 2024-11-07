@@ -130,11 +130,12 @@ class Trainer:
         datasets_dict = {"kitti": datasets.KITTIRAWDataset,
                          "kitti_odom": datasets.KITTIOdomDataset,
                          "syndrone": datasets.syndrone_dataset.SyndroneRAWDataset,
-                         "syndrone_odom": datasets.syndrone_dataset.SyndroneOdomDataset}
+                         "syndrone_odom": datasets.syndrone_dataset.SyndroneOdomDataset,
+                         "syndrone_depth": datasets.syndrone_dataset.SyndroneDepthDataset}
         
         self.dataset = datasets_dict[self.opt.dataset]
 
-        if self.opt.dataset == 'syndrone':
+        if self.opt.dataset == 'syndrone_depth':
             # NOTE: The syndrone data must be donwloaded into a folder called syndrone_data and placed within the monodepth2 folder
             self.opt.data_path = 'C:\\Users\\chase\\OneDrive\\Documents\\Grad\\ML_for_Robots\\hw_4\\ML_for_Robots_hw4\\monodetph2_repo\\monodepth2\\syndrone_data'
             rgb_folder = os.path.join(os.path.dirname(__file__), "syndrone_data", "Town01_Opt_120_color", "Town01_Opt_120", "ClearNoon", "height20m", "rgb")
